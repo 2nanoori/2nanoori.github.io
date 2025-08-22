@@ -15,6 +15,8 @@
 Gemfile.lock
 **/vendor/bundle
 
+.history
+
 # Node.js and NPM
 node_modules
 npm-debug.log*

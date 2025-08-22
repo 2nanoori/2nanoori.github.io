@@ -1,0 +1,36 @@
+---
+layout: home
+author_profile: true
+header:
+  overlay_color: "#5e616c"
+  overlay_filter: "0.5"
+  actions:
+    - label: "About Me"
+      url: "/about/"
+excerpt: "Welcome to my blog! I share insights on cloud technologies, backend engineering, and software development experiences through organized categories."
+intro: 
+  - excerpt: 'Follow my journey as a Cloud Platform & Backend Engineer preparing for European IT opportunities.'
+feature_row:
+  - alt: "Technical Posts"
+    title: "Technical Insights"
+    excerpt: "Java, backend engineering, exception handling, and software development best practices from real-world experience."
+    url: "/categories/"
+    btn_label: "Browse Categories"
+    btn_class: "btn--primary"
+  - alt: "Career Journey"
+    title: "Career Stories"
+    excerpt: "My journey from mechanical engineering to cloud platform development, lessons learned, and growth experiences."
+    url: "/year-archive/"
+    btn_label: "Read All Posts"
+    btn_class: "btn--primary"
+  - alt: "About Me"
+    title: "About SeungHyeon"
+    excerpt: "Learn about my background, skills, and aspirations for European IT opportunities."
+    url: "/about/"
+    btn_label: "Learn More"
+    btn_class: "btn--primary"
+---
+
+{% include feature_row id="intro" type="center" %}
+
+{% include feature_row %}

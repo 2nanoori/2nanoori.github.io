@@ -1,0 +1,30 @@
+# main links
+main:
+  - title: "About"
+    url: /about/
+  - title: "Posts"
+    url: /year-archive/
+  - title: "Categories"
+    url: /categories/
+  - title: "Tags"
+    url: /tags/
+
+# sidebar navigation for categories
+categories:
+  - title: "Browse Content"
+    children:
+      - title: "All Posts"
+        url: /year-archive/
+      - title: "Categories"
+        url: /categories/
+      - title: "Tags"
+        url: /tags/
+  
+  - title: "Main Topics"
+    children:
+      - title: "Java & Backend"
+        url: /categories/#java
+      - title: "Work Experience"
+        url: /categories/#work-experience
+      - title: "Career Development"
+        url: /categories/#career-development

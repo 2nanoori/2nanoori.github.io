@@ -19,8 +19,8 @@ tags:
   - Architecture Patterns
 toc: true
 toc_sticky: true
-date: 2025-01-15
-last_modified_at: 2025-01-15
+date: 2025-08-25
+last_modified_at: 2025-08-25
 ---
 
 ## Introduction

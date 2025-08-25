@@ -1,6 +1,6 @@
 ---
 title: "Exception Handling Best Practices: Lessons from Effective Java"
-date: 2024-12-26
+date: 2025-08-22
 categories:
   - Work Experience
 tags:

@@ -1,6 +1,6 @@
 ---
 title: "Do We Really Need Real-Time? Stream Processing System Optimization Retrospective (Part 1)"
-date: 2024-12-28
+date: 2025-08-23
 categories:
   - System Architecture
   - Work Experience

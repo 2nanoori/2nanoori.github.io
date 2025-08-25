@@ -15,6 +15,7 @@
 Gemfile.lock
 **/vendor/bundle
 
+# History
 .history
 
 # Node.js and NPM

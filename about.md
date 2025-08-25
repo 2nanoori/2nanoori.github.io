@@ -34,14 +34,6 @@ A unique aspect of my career is my transition from a **Mechanical Engineer** wit
   <img src="https://img.shields.io/badge/Apache Flink-E6526F?style=for-the-badge&logo=apache-flink&logoColor=white">
 </p>
 
-### DevOps & CI/CD
-<p>
-  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white">
-  <img src="https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white">
-  <img src="https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=jenkins&logoColor=white">
-  <img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white">
-</p>
-
 ### Monitoring & Observability (TSDB)
 <p>
   <img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=prometheus&logoColor=white">

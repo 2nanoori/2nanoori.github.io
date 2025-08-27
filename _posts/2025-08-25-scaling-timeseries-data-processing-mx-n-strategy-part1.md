@@ -467,7 +467,9 @@ In Part 2, I will cover the process of implementing and validating this M×N str
 - **Performance Test Design**: Test scenarios and metrics for measuring the limits of our TSDB.
 - **Validation**: The results of our hypothesis tested with real data, including its successes and limitations.
 
-Was the "Immediate Transformation" approach able to prove our hypothesis in the PoC? Find out in Part 2.
+Was the "Immediate Transformation" approach able to prove our hypothesis in the PoC? 
+
+**Spoiler Alert**: The team's feedback led to a completely different approach that was simpler, more practical, and ultimately more effective. Discover how collaborative refinement transformed our complex stream processing architecture into a pragmatic solution in Part 2.
 
 ---
 

@@ -38,12 +38,12 @@ My initial proposal was met with thoughtful questions that quickly moved from th
 
 My colleague **Colleague A**, who has several more years of experience with this service than I do, raised two critical points:
 
-1.  **Deployment Overhead**: "A new Flink job for a PoC requires cluster provisioning, configuration management, and ongoing maintenance. That's at least 2-3 weeks of work before we even start testing. Is this the right approach for a quick validation?"
-2.  **Network Latency Problems**: "We built a custom parallel consumer because standard consumers couldn't handle the network delays between our data centers. Flink will face the same issue. Should we really go down that path again?"
+1.  **Deployment Overhead**: "A new Flink job for a PoC requires cluster provisioning, configuration management, and ongoing maintenance. This adds significant complexity and time before we can even start testing. Is this the right approach for a quick validation?"
+2.  **Network Latency Problems**: "Our tsdb-writer uses a custom parallel consumer because standard consumers can't handle the network delays between our data centers. If Flink runs in a different IDC, it would face the same issue."
 
-This second point was crucial. It was undocumented knowledge that only existed in the heads of engineers who had lived through the problem—knowledge that wasn't written down anywhere but was critical for avoiding past mistakes. It immediately highlighted a major risk in my "clean" design.
+This second point was crucial. It highlighted a practical constraint that I hadn't fully considered: the existing infrastructure was already optimized for our specific network environment.
 
-Building on this, **Colleague B**, who also has extensive experience with this service, questioned the resource implications and sketched out a simpler alternative on the whiteboard.
+Building on this, **Colleague B**, who also has extensive experience with this service, questioned the resource implications and suggested a simpler alternative.
 
 ## The Alternative: Scaling the `data writer service` Directly
 
@@ -73,7 +73,7 @@ public void process(Metric metric) {
 }
 ```
 
-This approach was not only simpler but also leveraged the already-optimized, battle-hardened nature of our existing data writer service.
+This approach was not only simpler but also leveraged the existing, well-tested data writer service that was already handling our production workload.
 
 ## Head-to-Head: A Deeper Architectural Comparison
 
@@ -102,7 +102,7 @@ graph TB
         B2 --> C1
         B3 --> C1
         C1 --> D1[TSDB Writer]
-        D1 --> E1[VictoriaMetrics]
+        D1 --> E1[TSDB]
         
         style A1 fill:#ffcccc
         style C1 fill:#ffcccc
@@ -114,7 +114,7 @@ graph TB
     subgraph "Direct Writer Scaling (Simple)"
         A2[Source Topic] --> D2[Writer Instance 1<br/>00s, 10s, 20s]
         A2 --> D3[Writer Instance 2<br/>30s, 40s, 50s]
-        D2 --> E2[VictoriaMetrics]
+        D2 --> E2[TSDB]
         D3 --> E2
         
         style A2 fill:#ccffcc
@@ -134,7 +134,7 @@ graph TB
 
 ## Expanded Conclusion: Deeper Lessons from a Simple Pivot
 
-This experience was more than just a technical decision; it was a profound lesson in the sociology and philosophy of software engineering. The initial feeling of "my design was rejected" quickly gave way to a deeper appreciation for the collaborative process.
+This experience was more than just a technical decision; it was a valuable lesson in how team collaboration and practical constraints shape engineering decisions. The initial feeling of "my design was rejected" quickly gave way to a deeper appreciation for the collaborative process.
 
 #### 1. The Goal is Not a Perfect Design, but a Successful Outcome
 My initial design was clean, scalable, and followed best practices. It was, in a vacuum, a "good" design. But the goal of the PoC wasn't to build a perfect system; it was to **quickly and safely validate a hypothesis about our TSDB's limits.** The team's feedback didn't invalidate my design; it re-centered the discussion on the *actual goal*. The simpler approach was "better" because it served the project's immediate goal more effectively.
@@ -145,7 +145,7 @@ The most critical piece of information in the room—the network latency issues 
 #### 3. Embrace the Role of "Facilitator of the Best Idea"
 As engineers, it's easy to become attached to our own ideas. But true seniority lies not in having the best idea yourself, but in ensuring the best idea wins, regardless of its origin. By presenting a well-researched initial proposal, I created a high-quality starting point. By listening to the feedback and championing the simpler alternative, I transitioned from "owner of an idea" to "facilitator of the team's best solution." This shift in mindset is a critical step in an engineer's growth.
 
-This journey from a complex ideal to a simple, pragmatic solution was a powerful reminder that the best architectures are forged in the fires of collaborative debate. They are a blend of theoretical rigor and operational reality, and the process of finding that blend is what makes engineering a deeply human and rewarding discipline.
+This journey from a complex ideal to a simple, pragmatic solution was a powerful reminder that the best architectures emerge through collaborative discussion and practical constraints. They are a blend of theoretical rigor and operational reality, and the process of finding that blend is what makes engineering a deeply human and rewarding discipline.
 
 ---
 *All technical content in this article is based on actual production experience. Specific system names and configuration values have been generalized for security.*

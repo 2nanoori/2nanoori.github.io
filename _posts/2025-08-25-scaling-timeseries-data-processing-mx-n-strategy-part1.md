@@ -23,6 +23,8 @@ date: 2025-08-25
 last_modified_at: 2025-08-25
 ---
 
+{% include mermaid.html %}
+
 ## Introduction
 
 When operating time series data processing systems, we often face requirements to scale data ingestion. Two scenarios are particularly common:
@@ -268,7 +270,7 @@ However, the **number of data points certainly increases**, which impacts storag
 
 Ultimately, I chose the Immediate Transformation method.
 
-```mermaid
+<div class="mermaid">
 flowchart LR
     A["Source Topic<br/>(Low-Density Metrics)"] --> B["Stream Processor<br/>(Transformation Engine)"]
     B --> |"Immediate M-fold Transformation<br/>(1 → M)"| C["Target Topic<br/>(High-Density Metrics)"]
@@ -287,7 +289,7 @@ flowchart LR
     style B fill:#f3e5f5
     style C fill:#e8f5e8
     style D fill:#fff3e0
-```
+</div>
 
 **N-Dimension Scaling**: Implemented by running processing engines in parallel.
 - **Each processing engine**: Generates distinct time series with different label values.

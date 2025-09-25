@@ -39,7 +39,7 @@ My initial proposal was met with thoughtful questions that quickly moved from th
 My colleague **Colleague A**, who has several more years of experience with this service than I do, raised two critical points:
 
 1.  **Deployment Overhead**: "A new Flink job for a PoC requires cluster provisioning, configuration management, and ongoing maintenance. This adds significant complexity and time before we can even start testing. Is this the right approach for a quick validation?"
-2.  **Network Latency Problems**: "Our tsdb-writer uses a custom parallel consumer because standard consumers can't handle the network delays between our data centers. If Flink runs in a different IDC, it would face the same issue."
+2.  **Network Latency Problems**: "Our data writer service uses a custom parallel consumer because standard consumers can't handle the network delays between our data centers. If Flink runs in a different IDC, it would face the same issue."
 
 This second point was crucial. It highlighted a practical constraint that I hadn't fully considered: the existing infrastructure was already optimized for our specific network environment.
 
@@ -53,27 +53,58 @@ The proposal was to have each instance of the `data writer service` consume the 
 
 #### Implementation Sketch
 
-For example, one instance could be configured to handle the first half of the new timestamps within a minute, and a second instance could handle the other half. The core logic inside the service would be modified to read its assigned timestamp offsets from its configuration and loop through them, generating a new metric for each one.
+The key insight is that each writer instance handles both **M (time division)** and **N (cardinality expansion)** dimensions. For example, one instance could be configured to handle timestamps 00s, 10s, 20s, while another handles 30s, 40s, 50s. Each instance also applies the N-dimension logic to increase data volume.
 
 ```java
 // Inside the Data Writer Service's consumer logic
-List<Integer> assignedOffsets = config.getAssignedTimestampOffsets();
-
-public void process(Metric metric) {
-    LocalDateTime baseTime = metric.getTimestamp().truncatedTo(ChronoUnit.MINUTES);
+public class DataProcessor {
+    private final List<Integer> assignedTimestampOffsets; // M: time division
+    private final int cardinalityMultiplier;              // N: data volume expansion
     
-    for (int offset : assignedOffsets) {
-        Metric transformed = metric.copy();
-        transformed.setTimestamp(baseTime.plusSeconds(offset));
+    public void process(Metric metric) {
+        LocalDateTime baseTime = metric.getTimestamp().truncatedTo(ChronoUnit.MINUTES);
         
-        // The N-dimension logic (cardinality increase) could also be applied here.
-        
-        emitToWriterQueue(transformed);
+        // M: Time division - split into multiple timestamps
+        for (int offset : assignedTimestampOffsets) {
+            // N: Cardinality expansion - increase data volume
+            for (int instanceOffset = 0; instanceOffset < cardinalityMultiplier; instanceOffset++) {
+                Metric transformed = metric.copy();
+                transformed.setTimestamp(baseTime.plusSeconds(offset));
+                transformed.setInstanceNo(metric.getInstanceNo() + instanceOffset);
+                
+                emitToWriterQueue(transformed);
+            }
+        }
     }
 }
 ```
 
-This approach was not only simpler but also leveraged the existing, well-tested data writer service that was already handling our production workload.
+#### Configuration Example
+
+```java
+// Writer Instance A: handles 00s, 10s, 20s with 6x cardinality
+DataProcessor writerA = new DataProcessor(
+    Arrays.asList(0, 10, 20),  // M: 3 timestamps
+    6                           // N: 6x data volume
+);
+
+// Writer Instance B: handles 30s, 40s, 50s with 6x cardinality  
+DataProcessor writerB = new DataProcessor(
+    Arrays.asList(30, 40, 50), // M: 6x data volume
+    6                           // N: 6x data volume
+);
+```
+
+#### Data Volume Calculation
+
+With this approach:
+- **M = 6**: 1-minute data split into 6 timestamps (00s, 10s, 20s, 30s, 40s, 50s)
+- **N = 6**: Each timestamp gets 6x more data through instanceNo expansion
+- **Total Increase**: M × N = 6 × 6 = **36x data volume**
+
+This achieves the same M×N scaling effect as the Flink approach, but with simpler infrastructure.
+
+This approach was not only simpler but also leveraged the existing, well-tested data writer service that was already handling our production workload. Most importantly, it **fully implemented the M×N strategy** that was originally proposed, just with a different architectural approach.
 
 ## Head-to-Head: A Deeper Architectural Comparison
 
@@ -84,11 +115,12 @@ The discussion naturally led to a more formal comparison of the two approaches, 
 | **PoC Implementation Speed** | Slow | **Fast** | No new infrastructure or deployment pipelines needed. |
 | **Operational Risk** | High | **Low** | Introduces a new, unproven component vs. scaling a known, stable one. |
 | **Resource Efficiency** | Low | **High** | Avoids duplicating data in a second Kafka topic, saving storage and network bandwidth. |
+| **M×N Strategy Implementation** | **High** | **High** | Both approaches fully implement the M×N scaling strategy. |
 | **Architectural Purity** | **High** | Low | Concerns are cleanly separated vs. data writer handling both transformation and writing. |
 | **Long-term Maintainability** | **Potentially Easier** | Potentially Harder | A dedicated component is easier to reason about, while the writer's logic might grow complex. |
 | **Flexibility** | High | **Medium** | Flink offers a richer ecosystem for complex transformations beyond this PoC's scope. |
 
-For the PoC, the choice was obvious. The Direct Writer Scaling approach was faster, safer, and more resource-efficient. We acknowledged the trade-off: we were sacrificing a degree of architectural "purity" for a massive gain in pragmatism. For the limited scope of the PoC, this was the right call.
+For the PoC, the choice was obvious. The Direct Writer Scaling approach was faster, safer, and more resource-efficient. **Most importantly, it achieved the same M×N scaling effect (36x data volume increase) that was originally proposed.** We acknowledged the trade-off: we were sacrificing a degree of architectural "purity" for a massive gain in pragmatism. For the limited scope of the PoC, this was the right call.
 
 #### Visual Comparison of Approaches
 
